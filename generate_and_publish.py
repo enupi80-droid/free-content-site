@@ -61,20 +61,13 @@ def main():
         log("記事を生成できませんでした(今回はスキップ)")
         sys.exit(1)
 
-    thumbnail.create_thumbnail(article["title"], article["slug"])
-    site_builder.render_article(article)
+    thumbnail.create_hero_image(article, photo_query=article.get("photo_query"))
 
     posted = content_pipeline.load_posted()
-    posted.append({
-        "slug": article["slug"],
-        "title": article["title"],
-        "genre_id": article["genre_id"],
-        "genre_label": article["genre_label"],
-        "type": article["type"],
-        "published_at": article["published_at"],
-        "item_ids": article["item_ids"],
-    })
+    posted.append(article)  # 記事の全内容を保存(デザイン変更時に再生成できるように)
     content_pipeline.save_posted(posted)
+
+    site_builder.render_article(article, posted)
     site_builder.build_site(posted)
 
     log(f"公開しました: {article['title']} ({article['slug']})")

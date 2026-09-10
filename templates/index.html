@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="index-title">最近の記事</h1>
-<ul class="article-list">
+<section class="hero">
+  <h1 class="hero-title">{{ site_name }}</h1>
+  <p class="hero-tagline">{{ tagline }}</p>
+</section>
+
+<ul class="article-grid">
   {% for a in articles %}
-  <li class="article-list-item">
+  <li class="article-card">
     <a href="articles/{{ a.slug }}.html">
-      <img src="images/{{ a.slug }}.png" alt="{{ a.title }}" loading="lazy">
-      <p class="genre-tag">{{ a.genre_label }}{% if a.type == "product" %} ・ PR{% endif %}</p>
-      <p class="article-list-title">{{ a.title }}</p>
-      <p class="article-list-date">{{ a.published_at[:10] }}</p>
+      <div class="article-card-media">
+        <img src="images/{{ a.slug }}.png" alt="{{ a.title }}" loading="lazy">
+        <span class="badge" style="background:{{ a.genre_color or '#374151' }}">{{ a.genre_label }}{% if a.type == "product" %} ・ PR{% endif %}</span>
+      </div>
+      <div class="article-card-body">
+        <p class="article-card-title">{{ a.title }}</p>
+        <p class="article-card-excerpt">{{ a.meta_description }}</p>
+        <p class="article-card-date">{{ a.published_at[:10] }}</p>
+      </div>
     </a>
   </li>
   {% endfor %}

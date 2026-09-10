@@ -40,6 +40,8 @@ GENRES = [
         "id": "beauty",
         "label": "メンズ美容",
         "keyword": "メンズコスメ",
+        "color": "#b45309",
+        "photo_query": "men skincare grooming",
         "info_topics": [
             "メンズスキンケアの正しい順番",
             "清潔感を出すための髭・眉の整え方",
@@ -52,6 +54,8 @@ GENRES = [
         "id": "kitchen",
         "label": "キッチン",
         "keyword": "キッチン用品",
+        "color": "#0f766e",
+        "photo_query": "kitchen cooking home",
         "info_topics": [
             "まな板・フライパンを長持ちさせる手入れ方法",
             "一人暮らしの自炊を時短にするキッチン収納の工夫",
@@ -64,6 +68,8 @@ GENRES = [
         "id": "lifestyle",
         "label": "生活雑貨",
         "keyword": "便利グッズ",
+        "color": "#6d28d9",
+        "photo_query": "cozy home lifestyle organization",
         "info_topics": [
             "一人暮らしの洗濯物を生乾きにしない干し方",
             "部屋の湿気・カビ対策の基本",
@@ -150,6 +156,12 @@ def _attach_items_to_sections(sections: list[dict], items: list[dict]):
         )
 
 
+def _add_section_ids(sections: list[dict]):
+    """目次(TOC)用に各セクションへ一意なアンカーID(section-1, section-2, ...)を付与する"""
+    for i, section in enumerate(sections, 1):
+        section["id"] = f"section-{i}"
+
+
 def build_info_article(genre: dict, posted: list[dict], state: dict) -> dict | None:
     topic = pick_info_topic(genre, state)
     print(f"  情報系記事を作成します(ジャンル: {genre['label']} / テーマ: {topic})")
@@ -159,6 +171,8 @@ def build_info_article(genre: dict, posted: list[dict], state: dict) -> dict | N
         print("  [エラー] 記事生成に失敗しました")
         return None
 
+    _add_section_ids(raw["sections"])
+
     slug = slugify(genre["id"], "info")
     return {
         "slug": slug,
@@ -166,6 +180,8 @@ def build_info_article(genre: dict, posted: list[dict], state: dict) -> dict | N
         "meta_description": raw["meta_description"],
         "genre_id": genre["id"],
         "genre_label": genre["label"],
+        "genre_color": genre.get("color", "#374151"),
+        "photo_query": genre.get("photo_query", ""),
         "type": "info",
         "intro": raw["intro"],
         "sections": raw["sections"],
@@ -205,6 +221,7 @@ def build_product_article(genre: dict, posted: list[dict], state: dict) -> dict 
         return None
 
     _attach_items_to_sections(raw["sections"], new_items)
+    _add_section_ids(raw["sections"])
 
     slug = slugify(genre["id"], "product")
     return {
@@ -213,6 +230,8 @@ def build_product_article(genre: dict, posted: list[dict], state: dict) -> dict 
         "meta_description": raw["meta_description"],
         "genre_id": genre["id"],
         "genre_label": genre["label"],
+        "genre_color": genre.get("color", "#374151"),
+        "photo_query": genre.get("photo_query", ""),
         "type": "product",
         "intro": raw["intro"],
         "sections": raw["sections"],

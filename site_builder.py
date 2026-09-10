@@ -19,6 +19,9 @@ SITE_DIR = BASE_DIR / "docs"
 ARTICLES_DIR = SITE_DIR / "articles"
 SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "").rstrip("/")
 
+SITE_NAME = "暮らしと、ちょっといいもの。"
+SITE_TAGLINE = "実際のレビューをもとに、暮らしを少し良くするアイテムと知恵をお届けします。"
+
 _env = Environment(loader=FileSystemLoader(str(BASE_DIR / "templates")), autoescape=True)
 
 
@@ -26,11 +29,26 @@ def _canonical(path: str) -> str:
     return f"{SITE_BASE_URL}/{path}" if SITE_BASE_URL else ""
 
 
-def render_article(article: dict):
+def _related_articles(article: dict, all_articles: list[dict], max_items: int = 3) -> list[dict]:
+    """同じジャンルの他の記事を新しい順に返す(なければ他ジャンルの新着で埋める)"""
+    others = [a for a in all_articles if a["slug"] != article["slug"]]
+    same_genre = [a for a in others if a.get("genre_id") == article.get("genre_id")]
+    same_genre.sort(key=lambda a: a["published_at"], reverse=True)
+    result = same_genre[:max_items]
+    if len(result) < max_items:
+        rest = [a for a in others if a not in result]
+        rest.sort(key=lambda a: a["published_at"], reverse=True)
+        result += rest[: max_items - len(result)]
+    return result
+
+
+def render_article(article: dict, all_articles: list[dict]):
     ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
     html = _env.get_template("article.html").render(
         article=article,
-        title=article["title"],
+        related=_related_articles(article, all_articles),
+        site_name=SITE_NAME,
+        title=f"{article['title']} | {SITE_NAME}",
         description=article["meta_description"],
         canonical_url=_canonical(f"articles/{article['slug']}.html"),
         og_image=_canonical(f"images/{article['slug']}.png"),
@@ -45,8 +63,10 @@ def render_index(posted: list[dict], max_items: int = 30):
     recent = sorted(posted, key=lambda a: a["published_at"], reverse=True)[:max_items]
     html = _env.get_template("index.html").render(
         articles=recent,
-        title="サイト名(仮) | 暮らしを少し良くする情報サイト",
-        description="暮らしに役立つ情報と、実際のレビューを踏まえたアイテム紹介をお届けします。",
+        site_name=SITE_NAME,
+        tagline=SITE_TAGLINE,
+        title=f"{SITE_NAME} | {SITE_TAGLINE}",
+        description=SITE_TAGLINE,
         canonical_url=_canonical("index.html"),
         og_image="",
         root="",
@@ -77,3 +97,20 @@ def build_site(posted: list[dict]):
     render_index(posted)
     write_sitemap(posted)
     write_robots()
+
+
+def rebuild_all_pages():
+    """posted_articles.jsonに保存済みの全記事データから、docs/以下を丸ごと再生成する。
+    デザイン(テンプレート/CSS)だけを変更したときに、AIを呼び直さず全ページへ反映するために使う。
+    """
+    import content_pipeline
+    posted = content_pipeline.load_posted()
+    for article in posted:
+        render_article(article, posted)
+    build_site(posted)
+    return len(posted)
+
+
+if __name__ == "__main__":
+    count = rebuild_all_pages()
+    print(f"{count}件の記事ページを再生成しました")

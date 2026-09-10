@@ -4,11 +4,15 @@
 note_auto_bot/thumbnail_generator.py を移植したもの。画像生成APIは使わずAPIコスト0円。
 """
 
+import io
 import os
 import textwrap
 from pathlib import Path
 
+import requests
 from PIL import Image, ImageDraw, ImageFont
+
+import photo_source
 
 WIDTH, HEIGHT = 1280, 670
 OUTPUT_DIR = Path(__file__).parent / "docs" / "images"
@@ -84,3 +88,43 @@ def create_thumbnail(title: str, slug: str) -> str:
     filename = f"{slug}.png"
     img.save(OUTPUT_DIR / filename)
     return filename
+
+
+def _save_photo_from_url(image_url: str, slug: str) -> str | None:
+    """商品画像URL(楽天CDN等)を取得し、幅WIDTHにリサイズしてPNG保存する"""
+    try:
+        resp = requests.get(image_url, timeout=20)
+        resp.raise_for_status()
+        img = Image.open(io.BytesIO(resp.content)).convert("RGB")
+        if img.width > WIDTH:
+            ratio = WIDTH / img.width
+            img = img.resize((WIDTH, int(img.height * ratio)))
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        filename = f"{slug}.png"
+        img.save(OUTPUT_DIR / filename)
+        return filename
+    except Exception:
+        return None
+
+
+def create_hero_image(article: dict, photo_query: str | None = None) -> str:
+    """記事のヒーロー画像を用意する。優先順位:
+    1. 商品紹介記事 → 実際の商品写真(楽天CDN)
+    2. 情報系記事 → Pexels(無料写真素材API)で関連写真を検索
+    3. 上記が使えない場合 → Pillowでタイトル入りのグラデーション画像を生成(APIコスト0円のフォールバック)
+    """
+    slug = article["slug"]
+
+    if article.get("type") == "product":
+        for item in article.get("affiliate_items", []):
+            if item.get("image"):
+                filename = _save_photo_from_url(item["image"], slug)
+                if filename:
+                    return filename
+
+    if photo_query:
+        dest = OUTPUT_DIR / f"{slug}.png"
+        if photo_source.fetch_photo(photo_query, dest):
+            return f"{slug}.png"
+
+    return create_thumbnail(article["title"], slug)
