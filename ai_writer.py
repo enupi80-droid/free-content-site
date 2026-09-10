@@ -94,6 +94,14 @@ ARTICLE_JSON_FORMAT = (
     ' "conclusion": "まとめ(100字程度)"}'
 )
 
+PRODUCT_ARTICLE_JSON_FORMAT = (
+    '{"title": "記事タイトル", "meta_description": "120字程度の要約",'
+    ' "intro": "導入文(150字程度)",'
+    ' "sections": [{"heading": "自然な短い見出し(商品名そのままではなく内容が伝わる見出し)",'
+    ' "body": "本文", "product_index": 1}, ...],'
+    ' "conclusion": "まとめ(100字程度)"}'
+)
+
 
 def research_agent(topic_hint: str) -> str:
     """記事のテーマについて、執筆前の下調べ(構成案・切り口の整理)を行う。
@@ -153,10 +161,14 @@ def write_product_article(genre_label: str, topic_hint: str, items: list[dict],
         f"紹介する商品は次の{len(items)}点です: {names}\n\n"
         f"【商品データ(実データ。これだけを根拠にする)】\n{facts_text}\n\n"
         f"【文体・構成のルール】\n{ARTICLE_TONE_GUIDE}\n"
-        "- sections は商品ごとに1つずつ作り、heading に商品名を【商品データ】と表記を変えずに含めること\n"
+        "- sections は商品ごとに1つずつ作ること。何番目の商品データに対応するかを"
+        "product_index(1始まりの数値)に必ず入れること\n"
+        "- heading は商品名をそのまま使わず、内容が伝わる自然で短い見出しにすること"
+        "(例:「保湿ケアを1本で済ませたい人に」など)\n"
+        "- body の中で、商品名(【商品データ】の表記のまま)に一度だけ触れること\n"
         "- 価格・購入リンクは本文に含めない(別途システム側で追加するため)\n\n"
         f"【これまでに書いた記事タイトル(重複を避ける)】\n{avoid}\n\n"
-        f"次のJSON形式だけで出力してください(他の文章は一切出力しないでください):\n{ARTICLE_JSON_FORMAT}"
+        f"次のJSON形式だけで出力してください(他の文章は一切出力しないでください):\n{PRODUCT_ARTICLE_JSON_FORMAT}"
     )
     if feedback:
         prompt += f"\n\n【前回案への品質チェックのフィードバック。これを踏まえて書き直してください】\n{feedback}"

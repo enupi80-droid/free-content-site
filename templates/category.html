@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="category-hero">
+  <span class="badge" style="background:{{ genre.color }}">{{ genre.label }}</span>
+  <h1 class="category-title">{{ genre.label }}の記事一覧</h1>
+</section>
+
+{% if articles %}
+<ul class="article-grid">
+  {% for a in articles %}
+  <li class="article-card">
+    <a href="../articles/{{ a.slug }}.html">
+      <div class="article-card-media">
+        <img src="../images/{{ a.slug }}.png" alt="{{ a.title }}" loading="lazy">
+        {% if a.type == "product" %}<span class="badge" style="background:{{ a.genre_color or '#374151' }}">PR</span>{% endif %}
+      </div>
+      <div class="article-card-body">
+        <p class="article-card-title">{{ a.title }}</p>
+        <p class="article-card-excerpt">{{ a.meta_description }}</p>
+        <p class="article-card-date">{{ a.published_at[:10] }}</p>
+      </div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty-state">このカテゴリーの記事はまだありません。</p>
+{% endif %}
+{% endblock %}

@@ -5,6 +5,20 @@
   <p class="hero-tagline">{{ tagline }}</p>
 </section>
 
+{% if featured %}
+<a class="featured-card" href="articles/{{ featured.slug }}.html">
+  <div class="featured-media">
+    <img src="images/{{ featured.slug }}.png" alt="{{ featured.title }}" loading="lazy">
+  </div>
+  <div class="featured-body">
+    <span class="badge" style="background:{{ featured.genre_color or '#374151' }}">{{ featured.genre_label }}{% if featured.type == "product" %} ・ PR{% endif %}</span>
+    <p class="featured-title">{{ featured.title }}</p>
+    <p class="featured-excerpt">{{ featured.meta_description }}</p>
+    <p class="article-card-date">{{ featured.published_at[:10] }}</p>
+  </div>
+</a>
+{% endif %}
+
 <ul class="article-grid">
   {% for a in articles %}
   <li class="article-card">

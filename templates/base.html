@@ -11,16 +11,25 @@
 <meta property="og:description" content="{{ description }}">
 {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="{{ root }}favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ root }}style.css">
+{% if json_ld %}<script type="application/ld+json">{{ json_ld | safe }}</script>{% endif %}
 </head>
 <body>
 <a class="skip-link" href="#main">本文へ移動</a>
 <header class="site-header">
   <div class="site-header-inner">
     <a class="site-title" href="{{ root }}index.html">{{ site_name }}</a>
+    {% if nav_categories %}
+    <nav class="site-nav">
+      {% for c in nav_categories %}
+      <a href="{{ root }}categories/{{ c.id }}.html">{{ c.label }}</a>
+      {% endfor %}
+    </nav>
+    {% endif %}
   </div>
 </header>
 <main id="main">

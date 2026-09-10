@@ -146,14 +146,25 @@ def _normalize_ws(text: str) -> str:
 
 
 def _attach_items_to_sections(sections: list[dict], items: list[dict]):
-    """各セクションの見出しにどの商品が対応するかを、空白の差異を無視して判定し
-    section["item"] に紐付ける(テンプレート側でのあいまいな照合を避けるため)。"""
+    """各セクションに対応する商品をproduct_index(1始まり、AIが付与)から特定し、
+    section["item"] に紐付ける。見出しは商品名そのままではなく自然な文章にできるようにするため、
+    見出しの文字列一致ではなくインデックスで対応付ける設計にしている。"""
     for section in sections:
-        heading_norm = _normalize_ws(section.get("heading", ""))
-        section["item"] = next(
-            (item for item in items if _normalize_ws(item["name"]) in heading_norm),
-            None,
-        )
+        idx = section.get("product_index")
+        item = None
+        if isinstance(idx, int) and 1 <= idx <= len(items):
+            item = items[idx - 1]
+        elif isinstance(idx, str) and idx.isdigit() and 1 <= int(idx) <= len(items):
+            item = items[int(idx) - 1]
+        else:
+            # AIがproduct_indexを付け忘れた場合のフォールバック(空白差異を無視した名前一致)
+            heading_norm = _normalize_ws(section.get("heading", ""))
+            body_norm = _normalize_ws(section.get("body", ""))
+            item = next(
+                (i for i in items if _normalize_ws(i["name"]) in heading_norm + body_norm),
+                None,
+            )
+        section["item"] = item
 
 
 def _add_section_ids(sections: list[dict]):

@@ -128,3 +128,18 @@ def create_hero_image(article: dict, photo_query: str | None = None) -> str:
             return f"{slug}.png"
 
     return create_thumbnail(article["title"], slug)
+
+
+def create_favicon(letter: str = "暮", color=(180, 83, 9)) -> str:
+    """サイトのファビコンを生成する(docs/favicon.png)"""
+    size = 256
+    img = Image.new("RGB", (size, size), color)
+    draw = ImageDraw.Draw(img)
+    font = _load_font(int(size * 0.6))
+    bbox = draw.textbbox((0, 0), letter, font=font)
+    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    draw.text(((size - w) / 2 - bbox[0], (size - h) / 2 - bbox[1]), letter, font=font, fill=(255, 255, 255))
+    SITE_DIR = Path(__file__).parent / "docs"
+    SITE_DIR.mkdir(parents=True, exist_ok=True)
+    img.save(SITE_DIR / "favicon.png")
+    return "favicon.png"
