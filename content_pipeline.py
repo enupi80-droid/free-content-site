@@ -22,7 +22,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-import ai_writer
+import claude_writer as ai_writer  # Gemini版ai_writerから、Claude Code CLI版に切り替え(2026-09-10)
 import rakuten_source
 
 load_dotenv()
