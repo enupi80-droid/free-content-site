@@ -32,8 +32,10 @@
 - **サイトは実際に公開済み**: https://enupi80-droid.github.io/free-content-site/ (GitHubリポジトリ: https://github.com/enupi80-droid/free-content-site 、mainブランチ/docsフォルダをGitHub Pagesで配信)
 - Phase 1(記事生成・サイト構築)・Phase 2(GitHub Pagesへの実公開)は実装・検証済み。情報系記事・商品紹介記事とも実データで生成成功を確認。
 - GEMINI_API_KEYはこのサイト専用の新規キーに切り替え済み(他3プロジェクトと共有していた旧キーとは別)。ただし**Google検索連携(grounding)はこの無料枠キーでは429エラーになり使えない**ため、`ai_writer.py`のリサーチ工程はWeb検索なし(モデル自身の一般知識のみ、統計値等のでっち上げ禁止を明示)で構成している。
-- 楽天商品名が長い(全角スペース混じりなど)ため、商品名の一致判定は空白差異を無視した正規化比較にしている(`ai_writer._normalize_ws` / `content_pipeline._attach_items_to_sections`)。
+- 楽天商品名が長い(全角スペース混じりなど)ため、商品紹介記事のH2見出しには商品名をそのまま使わせていない。AIには`sections`の各要素に`product_index`(1始まり、何番目の商品データに対応するか)を出力させ、`content_pipeline._attach_items_to_sections`がそれを使って商品カードを紐付ける(`product_index`が無い場合のみ空白差異を無視した名前一致にフォールバック)。見出しは自然な短文、商品の正式名称は商品カード内に表示する。
 - モデル名は`gemini-3.6-flash`(このキーで`gemini-2.5-flash`は404になったため)。
+- 2026-09-10にデザインを全面刷新(Web検索でリサーチ済み、詳細は`C:\Users\naoya\.claude\skills\free-content-site\SKILL.md`の「デザイン方針」参照)。記事の全内容を`posted_articles.json`に保存するようにしたため、`python site_builder.py`(=`rebuild_all_pages()`)でAI呼び出しなしに全ページへデザイン変更を反映できる。
+- ヘッダーにジャンル別ナビゲーション、`docs/categories/<genre_id>.html`のカテゴリー一覧ページ、トップページの注目記事(最新1件の大きなカード)、ファビコン、記事ページのJSON-LD(Article構造化データ)を追加済み。
 - Phase 5のうち日次タスク`ContentSite_EveningAutoUpdate`(ログオン時トリガー+20時以降+1日1回ガード、`run_if_evening.py`)は登録済み。
 - Phase 3(Search Console/Analytics連携によるアクセス分析→自動修正ループ)は**未着手**。Google Cloudでの OAuthクライアント発行・Search Console/Analyticsプロパティ作成というユーザー側の追加作業が必要。記事の蓄積・インデックス登録には数日〜数週間かかるため、急ぐ理由がない限り後回しでよい。
 - Google Search Console/Analyticsの「サイト所有権確認」「アクセス解析タグの設置」自体は、ユーザーがプロパティを作成して確認コード/測定IDを教えてくれれば、Claudeが`templates/base.html`にタグを追加するだけで完了する(OAuth連携なしでも可視化はできる)。
