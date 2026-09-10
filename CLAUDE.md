@@ -14,10 +14,12 @@
 
 ## 主要ファイル
 
-- `content_pipeline.py`: ジャンルローテーション・記事タイプ選択(商品紹介 or 情報系)・楽天データ取得・AI呼び出しの統括
-- `ai_writer.py`: Gemini API(無料枠)呼び出し。リサーチ→執筆→品質チェックのパイプライン
+- `content_pipeline.py`: ジャンルローテーション・記事タイプ選択(商品紹介 or 情報系)・楽天データ取得・AI呼び出しの統括(`import claude_writer as ai_writer`で切り替え済み)
+- `claude_writer.py`: **記事生成のメイン**。Claude Code CLI(`claude -p`ヘッドレス実行、`CLAUDE_CODE_OAUTH_TOKEN`でサブスク認証)を使う。情報系記事はWebSearchツールを許可し、実際にリサーチしてから執筆させる
+- `ai_writer.py`: 旧Gemini API版(未使用のレガシー)。Google検索連携が無料枠で429エラーになる問題があり2026-09-10にclaude_writer.pyへ切り替えた。参考実装として残置
 - `rakuten_source.py`: 楽天市場商品検索APIのラッパー(rakuten_threads_botと同じロジック)
-- `thumbnail.py`: Pillowでサムネイル/OG画像をローカル生成(APIコストなし)
+- `photo_source.py`: Pexels API(無料)で情報系記事のヒーロー画像を検索・取得
+- `thumbnail.py`: ヒーロー画像の用意(`create_hero_image`: 商品記事→実商品写真、情報記事→Pexels写真、どちらも失敗時のみPillowでグラデーション画像を生成)
 - `site_builder.py`: Jinja2で`docs/`配下に静的HTML(記事ページ・一覧・sitemap.xml・robots.txt)を生成(GitHub Pagesの「mainブランチ/docsフォルダ」設定にそのまま対応)
 - `templates/`: `base.html` / `article.html` / `index.html`(Jinja2テンプレート)
 - `generate_and_publish.py`: 上記を1回の実行でまとめて行うエントリーポイント。Gitリポジトリが初期化済みならcommit&pushまで行う
@@ -31,11 +33,13 @@
 
 - **サイトは実際に公開済み**: https://enupi80-droid.github.io/free-content-site/ (GitHubリポジトリ: https://github.com/enupi80-droid/free-content-site 、mainブランチ/docsフォルダをGitHub Pagesで配信)
 - Phase 1(記事生成・サイト構築)・Phase 2(GitHub Pagesへの実公開)は実装・検証済み。情報系記事・商品紹介記事とも実データで生成成功を確認。
-- GEMINI_API_KEYはこのサイト専用の新規キーに切り替え済み(他3プロジェクトと共有していた旧キーとは別)。ただし**Google検索連携(grounding)はこの無料枠キーでは429エラーになり使えない**ため、`ai_writer.py`のリサーチ工程はWeb検索なし(モデル自身の一般知識のみ、統計値等のでっち上げ禁止を明示)で構成している。
+- **記事生成エンジンはClaude Code CLIに切り替え済み**(`claude_writer.py`)。理由: (1) Geminiの無料枠はGoogle検索連携(grounding)が429エラーで使えず「リサーチせずに書く」状態になっていた、(2) ユーザーから「Geminiじゃなくて、このクロード(サブスク課金分)でやったら」と明示的な指示があった。`claude setup-token`で発行した長期OAuthトークン(`CLAUDE_CODE_OAUTH_TOKEN`、サブスクリプション契約が必要・APIキー従量課金ではない)で認証し、`claude -p`のヘッドレス実行で記事を生成する。情報系記事はWebSearchツールを許可し、実際にリサーチしてから書かせている(重要: [[feedback_research_before_writing]]参照、検索なしでの生成に戻さないこと)。
+- Node.js・公式`@anthropic-ai/claude-code`パッケージはポータブル版で`C:\Users\naoya\tools\node\`配下に導入済み(管理者権限のwinget/MSIインストールがUAC待ちでハングしたため、zip版を展開する方式にした)。
+- Gemini版(`ai_writer.py`)は未使用のまま残置(参考・将来のフォールバック候補)。GEMINI_API_KEYはこのサイト専用の新規キーに切り替え済みだったが、現在は使っていない。
 - 楽天商品名が長い(全角スペース混じりなど)ため、商品紹介記事のH2見出しには商品名をそのまま使わせていない。AIには`sections`の各要素に`product_index`(1始まり、何番目の商品データに対応するか)を出力させ、`content_pipeline._attach_items_to_sections`がそれを使って商品カードを紐付ける(`product_index`が無い場合のみ空白差異を無視した名前一致にフォールバック)。見出しは自然な短文、商品の正式名称は商品カード内に表示する。
-- モデル名は`gemini-3.6-flash`(このキーで`gemini-2.5-flash`は404になったため)。
 - 2026-09-10にデザインを全面刷新(Web検索でリサーチ済み、詳細は`C:\Users\naoya\.claude\skills\free-content-site\SKILL.md`の「デザイン方針」参照)。記事の全内容を`posted_articles.json`に保存するようにしたため、`python site_builder.py`(=`rebuild_all_pages()`)でAI呼び出しなしに全ページへデザイン変更を反映できる。
 - ヘッダーにジャンル別ナビゲーション、`docs/categories/<genre_id>.html`のカテゴリー一覧ページ、トップページの注目記事(最新1件の大きなカード)、ファビコン、記事ページのJSON-LD(Article構造化データ)を追加済み。
+- **姉妹プロジェクトrakuten_threads_botから送客する仕組みを追加**(2026-09-10、ユーザー提案): Threadsの役立ち情報(Tips)投稿に、同ジャンルのfree_content_site最新記事へのリンクを添えるようにした(`rakuten_threads_bot/main.py`の`get_site_article_link`)。Tips投稿はもともと収益化していないため、送客に使っても既存の商品紹介投稿(Rakutenへの直接リンクが主CTA)と競合しない。
 - Phase 5のうち日次タスク`ContentSite_EveningAutoUpdate`(ログオン時トリガー+20時以降+1日1回ガード、`run_if_evening.py`)は登録済み。
 - Phase 3(Search Console/Analytics連携によるアクセス分析→自動修正ループ)は**未着手**。Google Cloudでの OAuthクライアント発行・Search Console/Analyticsプロパティ作成というユーザー側の追加作業が必要。記事の蓄積・インデックス登録には数日〜数週間かかるため、急ぐ理由がない限り後回しでよい。
 - Google Search Console/Analyticsの「サイト所有権確認」「アクセス解析タグの設置」自体は、ユーザーがプロパティを作成して確認コード/測定IDを教えてくれれば、Claudeが`templates/base.html`にタグを追加するだけで完了する(OAuth連携なしでも可視化はできる)。
@@ -58,15 +62,14 @@
 - Googleアカウントでの新規サービス登録・フォーム送信(Search Console/Analyticsのプロパティ作成、Googleアドセンスへの申請)
 - 上記に伴うパスワード入力
 
-- `.env`の中身(APIキー・アクセストークン)を出力・ログ表示・コミットしない。
+- `.env`の中身(APIキー・アクセストークン)を出力・ログ表示・コミットしない。特に`CLAUDE_CODE_OAUTH_TOKEN`はサブスクリプションに直結する長期トークンなので厳重に扱う。
 - 商品紹介記事は景品表示法のステマ規制対応として、必ず「PR」表記を含める(削除しない)。
-- GEMINI_API_KEYは他3プロジェクトと共有のため、無料枠のレート制限に当たりやすい。発生時は`ai_writer.py`の自動リトライに任せるか、専用キーの発行を検討する。
-- **記事は必ずリサーチしてから書く(重要・繰り返し指摘あり)**: 2026-09-10、Gemini無料枠のGoogle検索連携(grounding)が429エラーで使えず、一時的に「検索なし・モデルの一般知識のみ」で記事を書く構成にしたところ、ユーザーから「ちゃんとリサーチしてからね。いつも言ってると思うけど」と明確な修正指示があった。これは他プロジェクトでも繰り返し伝えられている方針。記事生成の仕組みを変更する際は、検索なしを既定にしないこと。この指摘を受けて、記事生成エンジンをGemini APIからClaude Code CLI(ユーザーのClaudeサブスクリプション、`claude setup-token`の長期トークンで無人実行、WebSearchツールで実リサーチ)へ切り替える作業を実施中。
+- **記事は必ずリサーチしてから書く(重要・繰り返し指摘あり)**: [[feedback_research_before_writing]]参照。情報系記事は`claude_writer.py`でWebSearchツールを必ず使わせること。検索なし(一般知識のみ)での生成に戻さない。
+- **Claude Code CLIの利用はサブスクリプション契約が前提**。`CLAUDE_CODE_OAUTH_TOKEN`が失効/未設定だとエラーになる(トークンは`claude setup-token`で再発行、ユーザーの対話操作が必要)。ANTHROPIC_API_KEYによる従量課金には絶対に切り替えないこと(ユーザーから明確に「課金はしない」と念押しされている)。
 
 ## 技術メモ
 
-- 必須環境変数: `RAKUTEN_APP_ID`, `RAKUTEN_ACCESS_KEY`, `RAKUTEN_AFFILIATE_ID`, `GEMINI_API_KEY`
-- 任意環境変数: `SITE_BASE_URL`(公開後のサイトURL。sitemap/canonical生成に使用。未設定の間はsitemapを生成しない)、`SITE_ARTICLE_TYPE_RATIO`(既定0.5、情報系記事になる確率)
+- 必須環境変数: `RAKUTEN_APP_ID`, `RAKUTEN_ACCESS_KEY`, `RAKUTEN_AFFILIATE_ID`, `CLAUDE_CODE_OAUTH_TOKEN`
+- 任意環境変数: `SITE_BASE_URL`(公開後のサイトURL。sitemap/canonical生成に使用。未設定の間はsitemapを生成しない)、`SITE_ARTICLE_TYPE_RATIO`(既定0.5、情報系記事になる確率)、`CLAUDE_CLI_PATH`(claude.exeの場所。既定値のままで通常は問題ない)、`PEXELS_API_KEY`(情報系記事のヒーロー画像用)
 - ローカルでの動作確認: `python generate_and_publish.py` を実行後、`python -m http.server --directory docs 8765` 等で`docs/`を配信してブラウザ確認できる
-- 記事の質チェックはrakuten_threads_botの`ai_pipeline.py`と同じ「リサーチ→執筆→品質チェック(不合格なら差し戻し、最大2回)」パターンを踏襲
-- ジャンル・トピックを増やす場合は`content_pipeline.py`の`GENRES`を編集する
+- ジャンル・トピックを増やす場合は`content_pipeline.py`の`GENRES`を編集する(`color`と`photo_query`も一緒に設定する)
