@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+{% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+{% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+<link rel="stylesheet" href="{{ root }}style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="site-title" href="{{ root }}index.html">サイト名(仮)</a>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <p>&copy; {{ year }} サイト名(仮)</p>
+</footer>
+</body>
+</html>

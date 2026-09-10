@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="index-title">最近の記事</h1>
+<ul class="article-list">
+  {% for a in articles %}
+  <li class="article-list-item">
+    <a href="articles/{{ a.slug }}.html">
+      <img src="images/{{ a.slug }}.png" alt="{{ a.title }}" loading="lazy">
+      <p class="genre-tag">{{ a.genre_label }}{% if a.type == "product" %} ・ PR{% endif %}</p>
+      <p class="article-list-title">{{ a.title }}</p>
+      <p class="article-list-date">{{ a.published_at[:10] }}</p>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

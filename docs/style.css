@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --bg: #f8f7f4;
+  --text: #1f2328;
+  --muted: #6b7280;
+  --accent: #b45309;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+  line-height: 1.8;
+}
+.site-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+}
+.site-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--text);
+  text-decoration: none;
+}
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+.site-footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 20px;
+}
+.genre-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: bold;
+  margin: 0 0 8px;
+}
+.pr-disclosure {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #fffbeb;
+}
+.published-at, .article-list-date {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+h1 { font-size: 1.6rem; line-height: 1.4; }
+h2 { font-size: 1.25rem; margin-top: 32px; }
+.product-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 12px 0;
+  background: var(--card-bg);
+}
+.product-card img { max-width: 100%; border-radius: 8px; }
+.product-name { font-weight: bold; margin: 8px 0 4px; }
+.product-price { color: var(--accent); font-weight: bold; }
+.product-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.article-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 20px;
+}
+.article-list-item a {
+  text-decoration: none;
+  color: var(--text);
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+.article-list-item img { width: 100%; display: block; }
+.article-list-item > a > * + * { margin: 4px 16px; }
+.article-list-item > a > img + * { margin-top: 12px; }
+.article-list-title { font-weight: bold; font-size: 1.05rem; }

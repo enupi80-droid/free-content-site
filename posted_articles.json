@@ -1,0 +1,33 @@
+[
+  {
+    "slug": "20260910-beauty-info-1",
+    "title": "メンズスキンケアの正しい順番とは？朝夜の違いやNGケアも解説",
+    "genre_id": "beauty",
+    "genre_label": "メンズ美容",
+    "type": "info",
+    "published_at": "2026-09-10T21:00:37",
+    "item_ids": []
+  },
+  {
+    "slug": "20260910-kitchen-info-2",
+    "title": "まな板とフライパンを長持ちさせる手入れ方法とNG習慣を解説",
+    "genre_id": "kitchen",
+    "genre_label": "キッチン",
+    "type": "info",
+    "published_at": "2026-09-10T21:01:52",
+    "item_ids": []
+  },
+  {
+    "slug": "20260910-kitchen-product-3",
+    "title": "おすすめキッチン用品比較！排気口カバー・パン袋・まな板を解説",
+    "genre_id": "kitchen",
+    "genre_label": "キッチン",
+    "type": "product",
+    "published_at": "2026-09-10T21:10:09",
+    "item_ids": [
+      "yamayuu:10016418",
+      "superpack:10000747",
+      "easyjoy-shop:10000337"
+    ]
+  }
+]

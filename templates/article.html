@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="article">
+  <p class="genre-tag">{{ article.genre_label }}</p>
+  <h1>{{ article.title }}</h1>
+  <p class="published-at">{{ article.published_at[:10] }}</p>
+
+  {% if article.type == "product" %}
+  <p class="pr-disclosure">※本記事には商品プロモーション(アフィリエイト広告)を含みます【PR】</p>
+  {% endif %}
+
+  <p class="intro">{{ article.intro }}</p>
+
+  {% for section in article.sections %}
+  <section>
+    <h2>{{ section.heading }}</h2>
+    <p>{{ section.body }}</p>
+    {% if article.type == "product" and section.item %}
+    <div class="product-card">
+      {% if section.item.image %}<img src="{{ section.item.image }}" alt="{{ section.item.name }}" loading="lazy">{% endif %}
+      <p class="product-name">{{ section.item.name }}</p>
+      <p class="product-price">{{ "{:,}".format(section.item.price) }}円(税込)</p>
+      {% if section.item.review_count %}<p class="product-review">★{{ section.item.review_average }}({{ "{:,}".format(section.item.review_count) }}件)</p>{% endif %}
+      <a class="product-link" href="{{ section.item.url }}" rel="nofollow sponsored noopener" target="_blank">楽天市場でチェックする(PR)</a>
+    </div>
+    {% endif %}
+  </section>
+  {% endfor %}
+
+  <p class="conclusion">{{ article.conclusion }}</p>
+</article>
+{% endblock %}
