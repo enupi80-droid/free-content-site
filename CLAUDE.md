@@ -29,14 +29,18 @@
 
 ## 現在のステータス(2026-09-10時点)
 
-- Phase 1(ローカルでの文章生成・サイト構築の土台)は実装済み。ダミーデータでのサイト生成・表示確認は完了。
-- 実データでのフルパイプライン(Gemini呼び出し)は、rakuten_threads_bot・youtube_jidoと共有しているGEMINI_API_KEYの**無料枠日次上限(1モデルにつき20リクエスト/日)に達したため未検証**。専用キーの発行 or 翌日の枠リセットを待って検証する。
-- Phase 0(GitHubアカウント連携・Google Search Console/Analytics連携)は未着手。ユーザー側の作業が必要。
-- Phase 2(GitHub Pagesへの実公開)・Phase 3(アクセス分析→自動修正ループ)は未実装。
+- **サイトは実際に公開済み**: https://enupi80-droid.github.io/free-content-site/ (GitHubリポジトリ: https://github.com/enupi80-droid/free-content-site 、mainブランチ/docsフォルダをGitHub Pagesで配信)
+- Phase 1(記事生成・サイト構築)・Phase 2(GitHub Pagesへの実公開)は実装・検証済み。情報系記事・商品紹介記事とも実データで生成成功を確認。
+- GEMINI_API_KEYはこのサイト専用の新規キーに切り替え済み(他3プロジェクトと共有していた旧キーとは別)。ただし**Google検索連携(grounding)はこの無料枠キーでは429エラーになり使えない**ため、`ai_writer.py`のリサーチ工程はWeb検索なし(モデル自身の一般知識のみ、統計値等のでっち上げ禁止を明示)で構成している。
+- 楽天商品名が長い(全角スペース混じりなど)ため、商品名の一致判定は空白差異を無視した正規化比較にしている(`ai_writer._normalize_ws` / `content_pipeline._attach_items_to_sections`)。
+- モデル名は`gemini-3.6-flash`(このキーで`gemini-2.5-flash`は404になったため)。
+- Phase 5のうち日次タスク`ContentSite_EveningAutoUpdate`(ログオン時トリガー+20時以降+1日1回ガード、`run_if_evening.py`)は登録済み。
+- Phase 3(Search Console/Analytics連携によるアクセス分析→自動修正ループ)は**未着手**。Google Cloudでの OAuthクライアント発行・Search Console/Analyticsプロパティ作成というユーザー側の追加作業が必要。記事の蓄積・インデックス登録には数日〜数週間かかるため、急ぐ理由がない限り後回しでよい。
+- Google Search Console/Analyticsの「サイト所有権確認」「アクセス解析タグの設置」自体は、ユーザーがプロパティを作成して確認コード/測定IDを教えてくれれば、Claudeが`templates/base.html`にタグを追加するだけで完了する(OAuth連携なしでも可視化はできる)。
 
 ## 自動投稿スケジュール
 
-未設定(Phase 0完了後に`ContentSite_EveningAutoUpdate`(日次)・`ContentSite_WeeklyReview`(週次)をタスクスケジューラへ登録予定)。
+`ContentSite_EveningAutoUpdate`(日次・ログオン時トリガー、20時以降・当日未実行なら`generate_and_publish.py`を1回実行)を登録済み。`ContentSite_WeeklyReview`(週次のアクセス分析→修正)はPhase 3未着手のため未登録。
 
 ## ユーザーについて
 
