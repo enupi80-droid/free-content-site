@@ -31,7 +31,7 @@
 
 ## 現在のステータス(2026-09-10時点)
 
-- **サイトは実際に公開済み**: https://enupi80-droid.github.io/free-content-site/ (GitHubリポジトリ: https://github.com/enupi80-droid/free-content-site 、mainブランチ/docsフォルダをGitHub Pagesで配信)
+- **サイトは実際に公開済み**: https://tigeregg80.github.io/free-content-site/ (GitHubリポジトリ: https://github.com/tigeregg80/free-content-site 、mainブランチ/docsフォルダをGitHub Pagesで配信)。**2026-09-12にGitHubユーザー名を`enupi80-droid`→`tigeregg80`へ変更した**(旧ユーザー名がユーザーの実メールアドレスのローカル部と一致しており、サイトURLから本人特定につながるリスクがあったため)。`.env`の`SITE_BASE_URL`・`rakuten_threads_bot/main.py`の送客リンク・`comments-worker/wrangler.toml`の`ALLOWED_ORIGIN`・git remoteを全て新ユーザー名に更新済み。同じ理由で**コメント機能のCloudflare Worker(workers.dev）サブドメインもユーザー側で変更予定**(変更後、`docs/comments.js`の`COMMENTS_API_BASE`と`wrangler.toml`を要更新)。
 - Phase 1(記事生成・サイト構築)・Phase 2(GitHub Pagesへの実公開)は実装・検証済み。情報系記事・商品紹介記事とも実データで生成成功を確認。
 - **記事生成エンジンはClaude Code CLIに切り替え済み**(`claude_writer.py`)。理由: (1) Geminiの無料枠はGoogle検索連携(grounding)が429エラーで使えず「リサーチせずに書く」状態になっていた、(2) ユーザーから「Geminiじゃなくて、このクロード(サブスク課金分)でやったら」と明示的な指示があった。`claude setup-token`で発行した長期OAuthトークン(`CLAUDE_CODE_OAUTH_TOKEN`、サブスクリプション契約が必要・APIキー従量課金ではない)で認証し、`claude -p`のヘッドレス実行で記事を生成する。情報系記事はWebSearchツールを許可し、実際にリサーチしてから書かせている(重要: [[feedback_research_before_writing]]参照、検索なしでの生成に戻さないこと)。
 - Node.js・公式`@anthropic-ai/claude-code`パッケージはポータブル版で`C:\Users\naoya\tools\node\`配下に導入済み(管理者権限のwinget/MSIインストールがUAC待ちでハングしたため、zip版を展開する方式にした)。
@@ -43,7 +43,10 @@
 - Phase 5のうち日次タスク`ContentSite_EveningAutoUpdate`(ログオン時トリガー+20時以降+1日1回ガード、`run_if_evening.py`)は登録済み。
 - Phase 3(Search Console/Analytics連携によるアクセス分析→自動修正ループ)は**未着手**。Google Cloudでの OAuthクライアント発行・Search Console/Analyticsプロパティ作成というユーザー側の追加作業が必要。記事の蓄積・インデックス登録には数日〜数週間かかるため、急ぐ理由がない限り後回しでよい。
 - Google Search Console/Analyticsの「サイト所有権確認」「アクセス解析タグの設置」自体は、ユーザーがプロパティを作成して確認コード/測定IDを教えてくれれば、Claudeが`templates/base.html`にタグを追加するだけで完了する(OAuth連携なしでも可視化はできる)。
-- **コメント機能を追加済み(2026-09-11)**: giscus(GitHub Discussionsを裏側に使う無料のコメントシステム)を`templates/article.html`に埋め込み、全記事ページの末尾に表示している。リポジトリのDiscussions機能を有効化し、giscus GitHub App(このリポジトリのみに権限を許可)をインストール済み。訪問者は自分のGitHubアカウントで自由にコメント・リアクションできる。設定値(`data-repo-id`等)はgiscus.appで生成したもの。
+- **コメント機能(2026-09-11追加、同日中にgiscusから自作に差し替え)**: 当初はgiscus(GitHub Discussions利用)を`templates/article.html`に埋め込んだが、GitHubアカウントが無い訪問者もコメントできるようにするため、Cloudflare Worker + D1(`comments-worker/`)による匿名コメント機能を自作して差し替えた。`docs/comments.js`が記事ページからWorkerのAPIを呼び出す。管理用の削除トークンは`.env`の`COMMENTS_ADMIN_TOKEN`。
+- **ジャンルを5つに拡大(2026-09-12)**: 美容/キッチン/生活雑貨に加え、ガジェット・メンズファッションを追加。各ジャンルの情報系記事ネタ(`info_topics`)も5→8〜10個に増量し、ネタ切れによる重複記事を防止。
+- **1日の投稿本数を1→2本に変更(2026-09-12)**: `run_if_evening.py`が`generate_and_publish.py`を2回連続実行するように変更(`rakuten_threads_bot`と同じPOSTS_PER_RUNパターン、間隔120秒)。
+- **「このサイトについて」「プライバシーポリシー」ページを追加(2026-09-12)**: `templates/page.html` + `site_builder.render_static_pages()`で生成、フッターにリンクを設置。将来のGoogleアドセンス審査にも必要なページ。
 - **記事ヒーロー画像の重複を修正(2026-09-11)**: `photo_source.fetch_photo`が常にPexels検索の上位1件だけを取得していたため、`photo_query`がジャンル固定(`content_pipeline.py`の`GENRES`)である情報系記事は同ジャンル内で同じ写真になっていた。候補を30件取得し`used_photos.json`(使用済みPexels写真ID)で重複を避けてランダムに選ぶよう修正。既存記事の画像も再生成済み。
 - **デザインは外部サイトリサーチ済み(2026-09-11)**: 2026年のブログ/LPデザイン動向を調査した結果、現行デザイン(セリフ+サンセリフ、カード型グリッド、ソフトな box-shadow+ホバーで浮き上がる、余白重視)は「ミニマル・エディトリアル」路線として概ねトレンドに合致していることを確認。今後さらに手を入れるなら、2026年のもう一つの潮流である**Bento UI**(大小の角丸ボックスをパズル状に組み合わせるモジュール型レイアウト)を注目記事セクション等に取り入れる余地がある。デザイン改善は継続タスクとして今後も外部リサーチしながら進める。
 
