@@ -116,11 +116,22 @@ def pick_genre(state: dict) -> dict:
 
 
 def pick_info_topic(genre: dict, state: dict) -> str:
+    """まだ使っていないテーマを順番に選ぶ。全テーマを使い切ったら最初から回す。
+    以前はインデックスを単純にインクリメントするだけだったため、状態の保存漏れ(手動で
+    作ったデモ記事など)があると同じインデックスに戻って同じテーマを再生成し、
+    ほぼ同じ内容の記事が重複してしまう問題があった。使用済みテーマそのものを記録する
+    方式にして、順序がずれても同じテーマを選び直さないようにしている。"""
     topics = genre["info_topics"]
-    key = f"last_info_topic_index_{genre['id']}"
-    idx = (state.get(key, -1) + 1) % len(topics)
-    state[key] = idx
-    return topics[idx]
+    key = f"used_info_topics_{genre['id']}"
+    used = state.get(key, [])
+    remaining = [t for t in topics if t not in used]
+    if not remaining:
+        used = []
+        remaining = topics
+    topic = remaining[0]
+    used = used + [topic]
+    state[key] = used
+    return topic
 
 
 def slugify(genre_id: str, article_type: str) -> str:
@@ -194,6 +205,7 @@ def build_info_article(genre: dict, posted: list[dict], state: dict) -> dict | N
         "genre_color": genre.get("color", "#374151"),
         "photo_query": genre.get("photo_query", ""),
         "type": "info",
+        "topic": topic,
         "intro": raw["intro"],
         "sections": raw["sections"],
         "conclusion": raw["conclusion"],
