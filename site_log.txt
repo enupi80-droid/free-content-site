@@ -23,3 +23,12 @@
 [2026-09-11T20:45:25] 20時以降のログオンを検知。generate_and_publish.py を実行します。
 [2026-09-11T20:45:28] 記事生成を開始します
 [2026-09-11T20:46:40] 公開しました: まな板とフライパンを長持ちさせるお手入れ方法まとめ (20260911-kitchen-info-1)
+[2026-09-11T20:46:42]   GitHubへpushしました
+[2026-09-11T20:46:43] [2026-09-11T20:45:28] 記事生成を開始します
+  商品紹介記事を作成します(ジャンル: キッチン)
+  [エラー] 楽天APIの商品取得に失敗しました: HTTPSConnectionPool(host='openapi.rakuten.co.jp', port=443): Max retries exceeded with url: /ichibams/api/IchibaItem/Search/20260701?applicationId=1b2325ca-14c2-42f5-82e2-e6acddb86e8f&accessKey=pk_9olL3IRjInridkxmkIfXquxSY2NLdBissZPUSXwpVL2&affiliateId=5737572e.018af34b.5737572f.9cd0fe5a&format=json&hits=30&sort=-reviewCount&keyword=%E3%82%AD%E3%83%83%E3%83%81%E3%83%B3%E7%94%A8%E5%93%81 (Caused by NameResolutionError("HTTPSConnection(host='openapi.rakuten.co.jp', port=443): Failed to resolve 'openapi.rakuten.co.jp' ([Errno 11001] getaddrinfo failed)"))
+  商品紹介記事が作れなかったため、情報系記事にフォールバックします
+  情報系記事を作成します(ジャンル: キッチン / テーマ: まな板・フライパンを長持ちさせる手入れ方法)
+[2026-09-11T20:46:40] 公開しました: まな板とフライパンを長持ちさせるお手入れ方法まとめ (20260911-kitchen-info-1)
+[2026-09-11T20:46:42]   GitHubへpushしました
+[2026-09-11T20:46:43] 完了。本日分の記事を公開しました。

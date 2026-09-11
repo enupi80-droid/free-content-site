@@ -301,6 +301,10 @@ main { max-width: 880px; margin: 0 auto; padding: 0 20px 72px; }
 .related { margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--border); }
 .related-title { font-family: var(--serif); font-weight: 800; font-size: 1.15rem; margin: 0 0 20px; }
 
+/* Comments */
+.comments { margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--border); }
+.comments-title { font-family: var(--serif); font-weight: 800; font-size: 1.15rem; margin: 0 0 20px; }
+
 /* Responsive */
 @media (max-width: 600px) {
   .site-header-inner, main, .site-footer { padding-left: 16px; padding-right: 16px; }
