@@ -1,0 +1,11 @@
+name = "free-content-site-comments"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "free-content-site-comments"
+database_id = "ff67361e-89d2-49af-9ec7-347d8616fd7a"
+
+[vars]
+ALLOWED_ORIGIN = "https://enupi80-droid.github.io"

@@ -1,3 +1,5 @@
 .env
 __pycache__/
 *.pyc
+comments-worker/node_modules/
+comments-worker/.wrangler/

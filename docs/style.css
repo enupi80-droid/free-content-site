@@ -305,6 +305,51 @@ main { max-width: 880px; margin: 0 auto; padding: 0 20px 72px; }
 .comments { margin-top: 56px; padding-top: 32px; border-top: 1px solid var(--border); }
 .comments-title { font-family: var(--serif); font-weight: 800; font-size: 1.15rem; margin: 0 0 20px; }
 
+.comments-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+.comments-empty, .comments-loading { color: var(--text-muted); font-size: .9rem; }
+.comment-item {
+  background: var(--accent-soft);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+.comment-item-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.comment-item-no { color: var(--accent); font-weight: 700; font-size: .85rem; }
+.comment-item-name { font-weight: 700; font-size: .88rem; }
+.comment-item-date { color: var(--text-muted); font-size: .76rem; }
+.comment-item-text { margin: 0; font-size: .92rem; line-height: 1.7; word-break: break-word; }
+
+.comment-form { display: flex; flex-direction: column; gap: 10px; }
+.comment-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.comment-name-input,
+.comment-text-input {
+  font-family: var(--sans);
+  font-size: .92rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  background: var(--bg);
+  color: var(--text);
+}
+.comment-text-input { min-height: 90px; resize: vertical; }
+.comment-name-input:focus, .comment-text-input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.comment-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.comment-status { color: var(--text-muted); font-size: .82rem; margin: 0; }
+.comment-submit {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: .88rem;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: filter .15s ease;
+  white-space: nowrap;
+}
+.comment-submit:hover { filter: brightness(1.08); }
+.comment-submit:disabled { opacity: .6; cursor: default; }
+
 /* Responsive */
 @media (max-width: 600px) {
   .site-header-inner, main, .site-footer { padding-left: 16px; padding-right: 16px; }
