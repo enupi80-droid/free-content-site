@@ -129,6 +129,7 @@ def write_sitemap(posted: list[dict]):
     urls = [f"{SITE_BASE_URL}/index.html"]
     urls += [f"{SITE_BASE_URL}/articles/{a['slug']}.html" for a in posted]
     urls += [f"{SITE_BASE_URL}/categories/{g['id']}.html" for g in content_pipeline.GENRES]
+    urls += [f"{SITE_BASE_URL}/{p['slug']}.html" for p in STATIC_PAGES]
     body = "\n".join(f"  <url><loc>{escape(u)}</loc></url>" for u in urls)
     xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{body}\n</urlset>\n'
     (SITE_DIR / "sitemap.xml").write_text(xml, encoding="utf-8")
@@ -141,10 +142,63 @@ def write_robots():
     (SITE_DIR / "robots.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+STATIC_PAGES = [
+    {
+        "slug": "about",
+        "heading": "このサイトについて",
+        "body": """
+<p>「{site_name}」は、暮らしを少し良くするアイテムや知恵を紹介するメディアです。</p>
+<h2>運営方針</h2>
+<p>商品紹介記事は、楽天市場に掲載されている実際の価格・レビュー件数・商品説明のみを根拠に作成しています。実際に使用していない効果や、商品ページに記載のないスペックを書くことはありません。</p>
+<p>お役立ち情報の記事は、インターネット上の情報を調査した上で、暮らしに役立つ知識をまとめています。</p>
+<h2>収益について</h2>
+<p>当サイトは楽天アフィリエイトプログラムに参加しており、商品紹介記事のリンクから購入いただくと、サイト運営者に紹介料が入る場合があります。商品紹介記事にはその旨(PR表記)を明記しています。</p>
+<h2>運営者</h2>
+<p>当サイトは個人が運営しています。お問い合わせは各記事末尾のコメント欄よりお願いいたします。</p>
+""",
+    },
+    {
+        "slug": "privacy",
+        "heading": "プライバシーポリシー",
+        "body": """
+<p>「{site_name}」(以下「当サイト」)における、個人情報の取り扱いについて説明します。</p>
+<h2>アクセス解析・広告について</h2>
+<p>当サイトは、サービス向上のためアクセス解析ツールや広告配信サービスを利用する場合があります。これらのサービスは、Cookie等を利用して個人を特定する情報を含まずにアクセス情報を収集することがあります。この情報は各サービス提供者のプライバシーポリシーに基づいて管理されます。</p>
+<h2>アフィリエイトプログラムについて</h2>
+<p>当サイトは楽天アフィリエイトプログラム等、各種アフィリエイトプログラムを利用しています。これらのプログラムを通じて商品・サービスを紹介し、成果に応じた収益を得る場合があります。</p>
+<h2>コメント機能について</h2>
+<p>記事へのコメントは匿名で投稿でき、アカウント登録は不要です。投稿内容には、法令に違反するもの・第三者の権利を侵害するもの・公序良俗に反するものを含めないでください。当サイト運営者が不適切と判断したコメントは、事前の通知なく削除する場合があります。</p>
+<h2>免責事項</h2>
+<p>当サイトのコンテンツ・情報について、できる限り正確な情報を提供するよう努めておりますが、正確性や安全性を保証するものではありません。当サイトの情報を用いて行う行動につきましては、ご自身の責任・判断で行っていただきますようお願いいたします。</p>
+<h2>プライバシーポリシーの変更</h2>
+<p>当サイトは、本ポリシーの内容を予告なく変更する場合があります。変更後のプライバシーポリシーは、本ページに掲載した時点から効力を生じるものとします。</p>
+""",
+    },
+]
+
+
+def render_static_pages():
+    for page in STATIC_PAGES:
+        html = _env.get_template("page.html").render(
+            page_heading=page["heading"],
+            page_body=page["body"].format(site_name=SITE_NAME),
+            site_name=SITE_NAME,
+            nav_categories=NAV_CATEGORIES,
+            title=f"{page['heading']} | {SITE_NAME}",
+            description=page["heading"],
+            canonical_url=_canonical(f"{page['slug']}.html"),
+            og_image="",
+            root="",
+            year=date.today().year,
+        )
+        (SITE_DIR / f"{page['slug']}.html").write_text(html, encoding="utf-8")
+
+
 def build_site(posted: list[dict]):
     """全記事分のindex/カテゴリページ/sitemap/robotsを再生成する(新しい記事を1本作った後などに呼ぶ)"""
     render_index(posted)
     render_category_pages(posted)
+    render_static_pages()
     write_sitemap(posted)
     write_robots()
 

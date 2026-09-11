@@ -99,6 +99,8 @@ main { max-width: 880px; margin: 0 auto; padding: 0 20px 72px; }
   text-align: center;
 }
 .footer-disclosure { margin-bottom: 6px; }
+.footer-nav { display: flex; justify-content: center; gap: 16px; margin-bottom: 10px; }
+.footer-nav a { color: var(--text-muted); text-decoration: underline; }
 
 /* Hero (index) */
 .hero { padding: 56px 0 40px; text-align: center; }

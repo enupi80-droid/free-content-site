@@ -12,12 +12,16 @@ rakuten_threads_bot/run_if_evening.py と同じパターン。
 
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 MARKER_FILE = BASE_DIR / "last_auto_run_date.txt"
 LOG_FILE = BASE_DIR / "site_log.txt"
+
+POSTS_PER_RUN = 2
+INTERVAL_SECONDS = 120  # 連続実行の間隔(APIへの負荷を分散するため)
 
 
 def log(message: str):
@@ -49,23 +53,32 @@ def main():
         log("本日はすでに実行済みなのでスキップします。")
         return
 
-    log("20時以降のログオンを検知。generate_and_publish.py を実行します。")
-    result = subprocess.run(
-        [sys.executable, str(BASE_DIR / "generate_and_publish.py")],
-        cwd=str(BASE_DIR),
-        capture_output=True,
-        text=True,
-    )
-    if result.stdout:
-        log(result.stdout.strip())
-    if result.stderr:
-        log(f"[stderr] {result.stderr.strip()}")
+    log(f"20時以降のログオンを検知。generate_and_publish.py を{POSTS_PER_RUN}回連続実行します。")
+
+    success_count = 0
+    for i in range(POSTS_PER_RUN):
+        log(f"--- {i + 1}/{POSTS_PER_RUN}件目 ---")
+        result = subprocess.run(
+            [sys.executable, str(BASE_DIR / "generate_and_publish.py")],
+            cwd=str(BASE_DIR),
+            capture_output=True,
+            text=True,
+        )
+        if result.stdout:
+            log(result.stdout.strip())
+        if result.stderr:
+            log(f"[stderr] {result.stderr.strip()}")
+
+        if result.returncode == 0:
+            success_count += 1
+        else:
+            log(f"この回はエラー終了しました(code={result.returncode})。次の回に進みます。")
+
+        if i < POSTS_PER_RUN - 1:
+            time.sleep(INTERVAL_SECONDS)
 
     mark_run_today(today)
-    if result.returncode == 0:
-        log("完了。本日分の記事を公開しました。")
-    else:
-        log(f"エラー終了しました(code={result.returncode})。本日分は使用済みにしています。")
+    log(f"完了。{success_count}/{POSTS_PER_RUN}件の記事を公開しました。本日分は使用済みにしています。")
 
 
 if __name__ == "__main__":
