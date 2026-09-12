@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://tigeregg80.github.io/free-content-site/sitemap.xml
+Sitemap: https://himapima.github.io/free-content-site/sitemap.xml

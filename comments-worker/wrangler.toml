@@ -8,4 +8,4 @@ database_name = "free-content-site-comments"
 database_id = "ff67361e-89d2-49af-9ec7-347d8616fd7a"
 
 [vars]
-ALLOWED_ORIGIN = "https://tigeregg80.github.io"
+ALLOWED_ORIGIN = "https://himapima.github.io"
