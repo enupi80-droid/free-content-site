@@ -2,7 +2,7 @@
  * 記事ページの匿名コメント機能(ログイン不要、Cloudflare Workerで自作したAPIを使う)
  */
 (function () {
-  const COMMENTS_API_BASE = "https://free-content-site-comments.enupi80.workers.dev";
+  const COMMENTS_API_BASE = "https://free-content-site-comments.tigeregg80.workers.dev";
 
   const root = document.querySelector("[data-comments-slug]");
   if (!root) return;
